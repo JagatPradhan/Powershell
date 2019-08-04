@@ -1,4 +1,6 @@
 ﻿
+# Author : JAGAT PRADHAN
+#email : Jagat.Pradhan@live.com
 # This script is intended to extract certain system details
 # This will work for bulk system
 
@@ -85,29 +87,38 @@ function System_Details()
     $list = Get-Content -Path 'D:\DO NOT DELETE_JAGAT\list.txt'
 
 
-     $os =foreach($server in $list)
+     foreach($server in $list)
       {
-        Get-CimInstance -ClassName Win32_OperatingSystem -ComputerName $server
-        }
-          
-      # Write the fetched data into rows & column
-            $os | ForEach-Object{
+        $os = Get-CimInstance -ClassName Win32_OperatingSystem -ComputerName $server
+        $tz = Get-CimInstance -ClassName Win32_TimeZone -ComputerName $server
 
-       $serverInfoSheet.Cells.Item($row,$column)= $_.CSName
+        foreach($data in $os)
+          {
+       $serverInfoSheet.Cells.Item($row,$column)= $os.CSName
        $column++
-       $serverInfoSheet.Cells.Item($row,$column)= $_.Caption
+       $serverInfoSheet.Cells.Item($row,$column)= $os.Caption
        $column++
-       $serverInfoSheet.Cells.Item($row,$column)= $_.OSArchitecture
+       $serverInfoSheet.Cells.Item($row,$column)= $os.OSArchitecture
        $column++
-       $serverInfoSheet.Cells.Item($row,$column)= $_.LastBootUpTime
+       $serverInfoSheet.Cells.Item($row,$column)= $os.LastBootUpTime
        $column++
-       $serverInfoSheet.Cells.Item($row,$column)= $_.LocalDateTime
+       $serverInfoSheet.Cells.Item($row,$column)= $os.LocalDateTime
        $column++
-       $serverInfoSheet.Cells.Item($row,$column)= $_.WindowsDirectory
+       $serverInfoSheet.Cells.Item($row,$column)= $os.WindowsDirectory
        $column++
       
+       }
+
+       foreach($value in $tz)
+       {
+       $serverInfoSheet.Cells.Item($row,$column)= $tz.Caption
+       
           $row++
           $Column = 1
+      
+       }
+
+
        }
 
     
