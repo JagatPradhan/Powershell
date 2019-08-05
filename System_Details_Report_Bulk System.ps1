@@ -3,8 +3,8 @@
 #email : Jagat.Pradhan@live.com
 # This script is intended to extract certain system details
 # This will work for bulk system
+#####CURRENT STATUS :::: WORK IN ROGRESS
 
- ##########Currently Working on loop for multiple report############
 
  
 function System_Details()
@@ -66,15 +66,23 @@ function System_Details()
     $serverInfoSheet.Cells.Item($row,$column).Interior.ColorIndex =48
     $serverInfoSheet.Cells.Item($row,$column).Font.Bold=$True
     $Column++
-    $serverInfoSheet.Cells.Item($row,$column)= 'LocalDate-Time'
-    $serverInfoSheet.Cells.Item($row,$column).Interior.ColorIndex =48
-    $serverInfoSheet.Cells.Item($row,$column).Font.Bold=$True
-    $Column++
     $serverInfoSheet.Cells.Item($row,$column)= 'WinDir'
     $serverInfoSheet.Cells.Item($row,$column).Interior.ColorIndex =48
     $serverInfoSheet.Cells.Item($row,$column).Font.Bold=$True
     $Column++
     $serverInfoSheet.Cells.Item($row,$column)= 'TimeZone'
+    $serverInfoSheet.Cells.Item($row,$column).Interior.ColorIndex =48
+    $serverInfoSheet.Cells.Item($row,$column).Font.Bold=$True
+    $Column++
+    $serverInfoSheet.Cells.Item($row,$column)= 'TotalMemory(GB)'
+    $serverInfoSheet.Cells.Item($row,$column).Interior.ColorIndex =48
+    $serverInfoSheet.Cells.Item($row,$column).Font.Bold=$True
+    $Column++
+    $serverInfoSheet.Cells.Item($row,$column)= 'Logical Processor'
+    $serverInfoSheet.Cells.Item($row,$column).Interior.ColorIndex =48
+    $serverInfoSheet.Cells.Item($row,$column).Font.Bold=$True
+    $Column++
+    $serverInfoSheet.Cells.Item($row,$column)= 'Free(C:)GB'
     $serverInfoSheet.Cells.Item($row,$column).Interior.ColorIndex =48
     $serverInfoSheet.Cells.Item($row,$column).Font.Bold=$True
     $Column++
@@ -90,7 +98,10 @@ function System_Details()
      foreach($server in $list)
       {
         $os = Get-CimInstance -ClassName Win32_OperatingSystem -ComputerName $server
-        $tz = Get-CimInstance -ClassName Win32_TimeZone -ComputerName $server
+        $tz =  Get-CimInstance -ClassName Win32_TimeZone -ComputerName $server
+        $tm = Get-CimInstance Win32_ComputerSystem -ComputerName $server | select name, @{Name ='TotalMemory';expression={[math]::Round($_.TotalPhysicalMemory / 1GB)}}
+        $lp =  Get-CimInstance Win32_ComputerSystem -ComputerName $server | select NumberOfLogicalProcessors
+        $vol =  Get-CimInstance Win32_Volume -ComputerName $server | select Name, @{Name = 'FreeSpace';expression={[math]::Round($_.FreeSpace / 1GB,2)}} | ?{$_.Name -eq 'C:\'}
 
         foreach($data in $os)
           {
@@ -102,8 +113,6 @@ function System_Details()
        $column++
        $serverInfoSheet.Cells.Item($row,$column)= $os.LastBootUpTime
        $column++
-       $serverInfoSheet.Cells.Item($row,$column)= $os.LocalDateTime
-       $column++
        $serverInfoSheet.Cells.Item($row,$column)= $os.WindowsDirectory
        $column++
       
@@ -112,23 +121,29 @@ function System_Details()
        foreach($value in $tz)
        {
        $serverInfoSheet.Cells.Item($row,$column)= $tz.Caption
-       
+       $Column++
+       }
+
+       foreach($msize in $tm)
+       {
+       $serverInfoSheet.Cells.Item($row,$column)= $tm.TotalMemory
+       $Column++
+        }
+    foreach($psize in $lp)
+       {
+
+       $serverInfoSheet.Cells.Item($row,$column)= $lp.NumberOfLogicalProcessors
+       $Column++
+       }
+
+       foreach($vsize in $vol)
+       {
+       $serverInfoSheet.Cells.Item($row,$column)= $vol.FreeSpace
+
           $row++
           $Column = 1
       
        }
-
-
-       }
-
-    
-       
-
-      
-       
-       
-
-           
- }
-
+    }
+  }
  System_Details
